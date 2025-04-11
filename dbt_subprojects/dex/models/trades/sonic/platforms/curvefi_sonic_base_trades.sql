@@ -17,9 +17,9 @@ exchange_evt_all as (
         t.evt_block_number as block_number,
         t.evt_block_time as block_time,
         t.bought_id as bought_id,
-		t.sold_id as sold_id,
-		t.tokens_bought AS token_bought_amount_raw,
-		t.tokens_sold AS token_sold_amount_raw,
+        t.sold_id as sold_id,
+        t.tokens_bought AS token_bought_amount_raw,
+        t.tokens_sold AS token_sold_amount_raw,
         t.buyer as taker,
         cast(null as varbinary) as maker,
         t.contract_address as project_contract_address,
@@ -36,9 +36,9 @@ exchange_und_evt_all as (
         t.evt_block_number as block_number,
         t.evt_block_time as block_time,
         t.bought_id,
-		t.sold_id,
-		t.tokens_bought AS token_bought_amount_raw,
-		t.tokens_sold AS token_sold_amount_raw,
+        t.sold_id,
+        t.tokens_bought AS token_bought_amount_raw,
+        t.tokens_sold AS token_sold_amount_raw,
         t.buyer as taker,
         cast(null as varbinary) as maker,
         t.contract_address as project_contract_address,
@@ -54,48 +54,56 @@ dexs as (
     select
         t.block_number,
         t.block_time,
-        pt_bought.token_address as token_bought_address,
-        pt_sold.token_address as token_sold_address,
-		t.token_bought_amount_raw,
-		t.token_sold_amount_raw,
+        CASE
+            WHEN t.bought_id = 0 THEN p.coin0
+            WHEN t.bought_id = 1 THEN p.coin1
+            WHEN t.bought_id = 2 THEN p.coin2
+            WHEN t.bought_id = 3 THEN p.coin3
+        END as token_bought_address,
+        CASE
+            WHEN t.sold_id = 0 THEN p.coin0
+            WHEN t.sold_id = 1 THEN p.coin1
+            WHEN t.sold_id = 2 THEN p.coin2
+            WHEN t.sold_id = 3 THEN p.coin3
+        END as token_sold_address,
+        t.token_bought_amount_raw,
+        t.token_sold_amount_raw,
         t.taker,
         t.maker,
         t.project_contract_address,
         t.tx_hash,
         t.evt_index
     from exchange_evt_all t
-    inner join {{ ref('curve_sonic_pools') }} pt_bought
-        on t.bought_id = cast(pt_bought.token_id as int256)
-        and t.project_contract_address = pt_bought.pool
-        and pt_bought.token_type = 'pool_token'
-    inner join {{ ref('curve_sonic_pools') }} pt_sold
-        on t.sold_id = cast(pt_sold.token_id as int256)
-        and t.project_contract_address = pt_sold.pool
-        and pt_sold.token_type = 'pool_token'
+    inner join {{ ref('curve_sonic_pools') }} p
+        on t.project_contract_address = p.pool_address
 
     union all
 
     select
         t.block_number,
         t.block_time,
-        pt_bought.token_address as token_bought_address,
-        pt_sold.token_address as token_sold_address,
-		t.token_bought_amount_raw,
-		t.token_sold_amount_raw,
+        CASE
+            WHEN t.bought_id = 0 THEN p.undercoin0
+            WHEN t.bought_id = 1 THEN p.undercoin1
+            WHEN t.bought_id = 2 THEN p.undercoin2
+            WHEN t.bought_id = 3 THEN p.undercoin3
+        END as token_bought_address,
+        CASE
+            WHEN t.sold_id = 0 THEN p.undercoin0
+            WHEN t.sold_id = 1 THEN p.undercoin1
+            WHEN t.sold_id = 2 THEN p.undercoin2
+            WHEN t.sold_id = 3 THEN p.undercoin3
+        END as token_sold_address,
+        t.token_bought_amount_raw,
+        t.token_sold_amount_raw,
         t.taker,
         t.maker,
         t.project_contract_address,
         t.tx_hash,
         t.evt_index
     from exchange_und_evt_all t
-    inner join {{ ref('curve_sonic_pools') }} pt_bought
-        on t.bought_id = cast(pt_bought.token_id as int256)
-        and t.project_contract_address = pt_bought.pool
-        and pt_bought.token_type = 'underlying_token_bought'
-    inner join {{ ref('curve_sonic_pools') }} pt_sold
-        on t.sold_id = cast(pt_sold.token_id as int256)
-        and t.project_contract_address = pt_sold.pool
-        and pt_sold.token_type = 'underlying_token_sold'
+    inner join {{ ref('curve_sonic_pools') }} p
+        on t.project_contract_address = p.pool_address
 )
 
 select
