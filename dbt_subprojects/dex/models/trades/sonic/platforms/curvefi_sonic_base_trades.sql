@@ -25,12 +25,12 @@ exchange_evt_all as (
         t.contract_address as project_contract_address,
         t.evt_tx_hash as tx_hash,
         t.evt_index
-    from {{ source('curvefi_sonic', 'stableswap_evt_TokenExchange') }} t
+    from {{ source('curvefi_sonic', 'CurveStableSwap_evt_TokenExchange') }} t
     {% if is_incremental() %}
     where {{ incremental_predicate('t.evt_block_time') }}
     {% endif %}
 ),
- 
+
 exchange_und_evt_all as (
     select
         t.evt_block_number as block_number,
@@ -44,7 +44,7 @@ exchange_und_evt_all as (
         t.contract_address as project_contract_address,
         t.evt_tx_hash as tx_hash,
         t.evt_index
-    from {{ source('curvefi_sonic', 'stableswap_evt_TokenExchangeUnderlying') }} t
+    from {{ source('curvefi_sonic', 'CurveStableSwap_evt_TokenExchangeUnderlying') }} t
     {% if is_incremental() %}
     where {{ incremental_predicate('t.evt_block_time') }}
     {% endif %}
