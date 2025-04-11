@@ -32,7 +32,7 @@ WITH plain_pools AS (
         CAST(NULL as varbinary) AS undercoin3
     FROM
         {{ source('curvefi_sonic', 'CurveStableSwapFactory_call_deploy_plain_pool') }} as p
-        LEFT JOIN {{ source('curvefi_sonic', 'CurveStableSwapFactory_evt_PlainPoolDeployed') }} dp
+        INNER JOIN {{ source('curvefi_sonic', 'CurveStableSwapFactory_evt_PlainPoolDeployed') }} dp
         ON p.call_block_time = dp.evt_block_time
         AND p.call_tx_hash = dp.evt_tx_hash
         AND p._coins = dp.coins
@@ -60,7 +60,7 @@ meta_pools AS (
         r.coin2 as undercoin3
     FROM
         {{ source('curvefi_sonic', 'CurveStableSwapFactory_call_deploy_metapool') }} mc
-        LEFT JOIN {{ source('curvefi_sonic', 'CurveStableSwapFactory_evt_MetaPoolDeployed') }} mp
+        INNER JOIN {{ source('curvefi_sonic', 'CurveStableSwapFactory_evt_MetaPoolDeployed') }} mp
         ON mc.call_block_time = mp.evt_block_time
         AND mc.call_tx_hash = mp.evt_tx_hash
         LEFT JOIN plain_pools r ON r.pool_address = mc._base_pool
