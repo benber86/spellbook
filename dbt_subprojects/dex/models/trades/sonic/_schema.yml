@@ -75,7 +75,7 @@ models:
             - evt_index
       - check_dex_base_trades_seed:
           seed_file: ref('shadow_sonic_base_trades_seed')
-          
+
   - name: silverswap_sonic_base_trades
     meta:
       blockchain: sonic
@@ -92,4 +92,21 @@ models:
             - evt_index
       - check_dex_base_trades_seed:
           seed_file: ref('silverswap_sonic_base_trades_seed')
+
+  - name: curvefi_sonic_base_trades
+    meta:
+      blockchain: sonic
+      sector: dex
+      project: curvefi
+      contributors: benny
+    config:
+      tags: ['sonic', 'dex', 'trades', 'curvefi']
+    description: "Curve.fi sonic base trades"
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - tx_hash
+            - evt_index
+      - check_dex_base_trades_seed:
+          seed_file: ref('curvefi_sonic_base_trades_seed')
           
